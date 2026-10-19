@@ -1,0 +1,16 @@
+{
+  "name": "ghost-proxifier-replica",
+  "version": "1.1.0",
+  "description": "Ghost Proxifier Pro replica — Windows process-level transparent proxy",
+  "main": "main.js",
+  "private": true,
+  "author": "Replica for local study",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron ."
+  },
+  "devDependencies": {
+    "@electron/packager": "^20.3.0",
+    "electron": "^44.9.0"
+  }
+}

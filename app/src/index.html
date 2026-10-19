@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'">
+  <title>Ghost Proxifier</title>
+  <link rel="stylesheet" href="styles.css?v=8">
+</head>
+<body>
+  <div id="app" class="app">
+    <aside class="sidebar" id="sidebar">
+      <div class="brand">
+        <div class="ghost-mark" aria-hidden="true">
+          <svg viewBox="0 0 32 32" fill="none">
+            <path d="M5.6 26.5V14.4C5.6 8.6 10.2 4 15.9 4c5.8 0 10.4 4.6 10.4 10.4v12.1l-3.1-2.2-3.2 2.7-3.1-2.7-3.2 2.7-3.1-2.7-2.9 2.2Z" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/>
+            <circle cx="12" cy="14" r="1.7" fill="currentColor"/>
+            <circle cx="20.2" cy="14" r="1.7" fill="currentColor"/>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <div class="brand-name">GHOST</div>
+          <div class="brand-sub">PROXIFIER ENGINE</div>
+        </div>
+      </div>
+
+      <nav class="nav" id="nav">
+        <button class="nav-item active" data-page="process">
+          <span class="nav-ico">
+            <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="7.5" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="12" r="2.2" stroke="currentColor" stroke-width="1.7"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+          </span>
+          <span class="nav-label" data-i18n="nav_process">进程管理</span>
+        </button>
+        <button class="nav-item" data-page="dns">
+          <span class="nav-ico">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M12 2.8 20 6v5.7c0 4.7-3.4 8.1-8 9.5-4.6-1.4-8-4.8-8-9.5V6l8-3.2Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="m9 12 2 2 4-4.2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </span>
+          <span class="nav-label" data-i18n="nav_dns">DNS 安全</span>
+        </button>
+        <button class="nav-item" data-page="upstream">
+          <span class="nav-ico">
+            <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="7" height="6" rx="1.6" stroke="currentColor" stroke-width="1.6"/><rect x="14" y="14" width="7" height="6" rx="1.6" stroke="currentColor" stroke-width="1.6"/><path d="M10 7h4.2a2 2 0 0 1 2 2v5M14 17h-4.2a2 2 0 0 1-2-2V9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+          </span>
+          <span class="nav-label" data-i18n="nav_upstream">上游节点</span>
+        </button>
+        <button class="nav-item" data-page="stats">
+          <span class="nav-ico">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M4 18V6M4 18h16" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="m7 14 3.2-4 3 2.6L20 6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </span>
+          <span class="nav-label" data-i18n="nav_stats">流量统计</span>
+        </button>
+        <button class="nav-item" data-page="license">
+          <span class="nav-ico">
+            <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="9" r="5.2" stroke="currentColor" stroke-width="1.7"/><path d="m8.6 13.4-1.2 7 4.6-2.4 4.6 2.4-1.2-7" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>
+          </span>
+          <span class="nav-label" data-i18n="nav_license">授权许可</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-foot">
+        <div class="side-status">
+          <div class="side-status-label" data-i18n="upstream_status">上游状态</div>
+          <div class="side-status-row"><span class="dot ok" id="side-dot"></span><span id="side-status-text">已连接</span></div>
+          <div class="side-addr" id="side-addr">127.0.0.1:2080 (NekoBox)</div>
+        </div>
+        <button class="collapse-btn" id="collapse-btn" title="折叠侧栏">
+          <svg viewBox="0 0 24 24" fill="none"><path d="m14 7-5 5 5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+    </aside>
+
+    <main class="main-shell">
+      <div class="page-wrap" id="page-wrap">
+
+        <!-- ============ 进程管理 ============ -->
+        <section class="page active" id="page-process">
+          <header class="page-head">
+            <div class="page-title">
+              <h1>活动进程 <span class="pro-badge"><svg viewBox="0 0 24 24" fill="none"><path d="m4 8 3.4-4h9.2L20 8l-8 12L4 8Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M4 8h16M9 8l3 12 3-12" stroke="currentColor" stroke-width="1.3"/></svg>PRO</span></h1>
+              <p data-i18n="process_sub">只有被注入的进程才会通过代理隧道</p>
+            </div>
+            <div class="proxy-pill">
+              <span class="dot ok" id="pill-dot"></span>
+              <span id="pill-status">代理已开启</span>
+              <span class="pill-divider"></span>
+              <span id="pill-node">NekoBox</span>
+              <button class="pill-btn" id="btn-go-settings" data-i18n="go_settings">去设置</button>
+            </div>
+          </header>
+
+          <div class="action-grid">
+            <button class="action-card" id="act-smart" style="--accent:#3ddbd9">
+              <span class="action-ico">
+                <svg viewBox="0 0 24 24" fill="none"><path d="m13.5 2-8 11h5.4L10 22l8.5-11.4h-5.6L13.5 2Z" fill="currentColor" opacity=".9"/></svg>
+              </span>
+              <span class="action-title" data-i18n="smart_detect">智能探测</span>
+              <span class="action-sub" data-i18n="smart_detect_sub">拖入或点击</span>
+            </button>
+            <button class="action-card" id="act-manual" style="--accent:#5b8def">
+              <span class="action-ico">
+                <svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+              </span>
+              <span class="action-title" data-i18n="manual_select">手动选择</span>
+              <span class="action-sub" data-i18n="manual_select_sub">浏览并启动</span>
+            </button>
+            <button class="action-card" id="act-cmd" style="--accent:#8b93f8">
+              <span class="action-ico action-ico-terminal">
+                <span class="mini-term"><i>&gt;_</i><b>CMD</b></span>
+              </span>
+              <span class="action-title" data-i18n="cmd_term">CMD 终端</span>
+              <span class="action-sub" data-i18n="cmd_term_sub">打开已注入的命令提示符</span>
+            </button>
+            <button class="action-card" id="act-ps" style="--accent:#38bdf8">
+              <span class="action-ico action-ico-terminal">
+                <span class="mini-term ps"><i>&gt;_</i><b>PS</b></span>
+              </span>
+              <span class="action-title" data-i18n="ps_term">PowerShell 终端</span>
+              <span class="action-sub" data-i18n="ps_term_sub">打开已注入的 PowerShell</span>
+            </button>
+          </div>
+
+          <section class="section">
+            <div class="section-head">
+              <h2 data-i18n="managed_procs">已托管进程</h2>
+              <span class="section-count" id="managed-count"></span>
+            </div>
+            <div class="process-grid" id="process-grid"></div>
+            <div class="empty-hint" id="process-empty" data-i18n="empty_process">将程序或快捷方式拖入窗口，立即开始接管</div>
+          </section>
+
+          <section class="section terminals-section" id="terminals-section">
+            <h2 data-i18n="proxy_terminals">代理终端</h2>
+            <div class="process-grid" id="terminal-grid"></div>
+          </section>
+        </section>
+
+        <!-- ============ 流量统计 ============ -->
+        <section class="page" id="page-stats">
+          <header class="page-head">
+            <div class="page-title">
+              <h1 data-i18n="stats_title">流量与性能统计</h1>
+              <p data-i18n="stats_sub">实时监控隧道流量和各个进程的网络占用情况</p>
+            </div>
+            <button class="btn btn-icon" id="btn-export">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M12 3v11m0 0 4-4m-4 4-4-4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+              <span data-i18n="export_report">导出报表</span>
+            </button>
+          </header>
+
+          <div class="stat-grid">
+            <div class="stat-card">
+              <div class="stat-label" data-i18n="total_down">总下载</div>
+              <div class="stat-value"><span id="stat-down">0.00</span> <em>MB</em></div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label" data-i18n="total_up">总上传</div>
+              <div class="stat-value"><span id="stat-up">0.00</span> <em>MB</em></div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label" data-i18n="active_conns">活动连接数</div>
+              <div class="stat-value"><span id="stat-conns">0</span></div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label" data-i18n="dns_blocked">DNS 拦截数</div>
+              <div class="stat-value"><span id="stat-blocked">0</span></div>
+            </div>
+          </div>
+
+          <div class="chart-card">
+            <div class="chart-head">
+              <div class="chart-title" data-i18n="realtime_throughput">实时吞吐量（过去 60 秒）</div>
+              <div class="chart-peak"><span data-i18n="peak">当前峰值</span>: <b id="chart-peak">0 B/s</b></div>
+            </div>
+            <canvas id="traffic-chart" height="250"></canvas>
+          </div>
+
+          <section class="table-card ranking-card">
+            <div class="table-head"><h2 data-i18n="traffic_ranking">流量排行</h2></div>
+            <table>
+              <thead><tr>
+                <th data-i18n="col_process">进程</th>
+                <th class="num" data-i18n="col_down">下载</th>
+                <th class="num" data-i18n="col_up">上传</th>
+                <th class="num" data-i18n="col_conns">连接数</th>
+              </tr></thead>
+              <tbody id="ranking-body"></tbody>
+            </table>
+          </section>
+        </section>
+
+        <!-- ============ DNS 安全 ============ -->
+        <section class="page" id="page-dns">
+          <header class="page-head">
+            <div class="page-title">
+              <h1 data-i18n="dns_title">DNS 安全配置</h1>
+              <p data-i18n="dns_sub">管理 DNS 解析配置，增强隐私保护并防止域名污染</p>
+            </div>
+          </header>
+
+          <div class="dns-hero" id="dns-hero" title="双击进行深度配置">
+            <div class="dns-hero-top">
+              <div class="stat-label" data-i18n="primary_resolver">主解析服务器</div>
+              <span class="dns-badge" id="dns-badge">正在使用自定义解析</span>
+            </div>
+            <div class="dns-hero-value">
+              <span id="dns-server">8.8.8.8</span>
+              <span class="dns-port">PORT <b id="dns-port">53</b></span>
+            </div>
+            <div class="dns-hero-hint">
+              <svg viewBox="0 0 24 24" fill="none"><path d="m4 20 4.2-1 10.5-10.5a2.1 2.1 0 0 0-3-3L5.2 16 4 20Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+              <span data-i18n="dns_edit_hint">双击卡片内容以进行深度配置</span>
+            </div>
+          </div>
+
+          <div class="toggle-card">
+            <div>
+              <div class="toggle-title" data-i18n="block_local_dns">拦截并代理本地 DNS</div>
+              <div class="toggle-sub" data-i18n="block_local_dns_sub">将所有进程的 DNS 请求重定向至上游代理，防止 DNS 污染与泄露</div>
+            </div>
+            <label class="switch"><input type="checkbox" id="dns-proxy-toggle"><span></span></label>
+          </div>
+
+          <section class="table-card dns-table-card">
+            <div class="table-head"><h2 data-i18n="recent_dns">最近拦截记录</h2></div>
+            <table>
+              <thead><tr>
+                <th data-i18n="col_time">时间</th>
+                <th data-i18n="col_domain">域名</th>
+                <th data-i18n="col_resolved">解析 IP（修正）</th>
+                <th data-i18n="col_process">进程</th>
+                <th class="right" data-i18n="col_status">状态</th>
+              </tr></thead>
+              <tbody id="dns-body"></tbody>
+            </table>
+          </section>
+        </section>
+
+        <!-- ============ 上游节点 ============ -->
+        <section class="page" id="page-upstream">
+          <header class="page-head">
+            <div class="page-title">
+              <h1 data-i18n="upstream_title">上游代理节点</h1>
+              <p data-i18n="upstream_sub">管理所有流量的最终出口，支持 SOCKS5 / HTTP / Shadowsocks 等协议</p>
+            </div>
+            <div class="head-actions">
+              <button class="btn" id="btn-test-all">
+                <svg viewBox="0 0 24 24" fill="none"><path d="m13 2-8 11h5.4L10 22l8.5-11.4h-5.6L13 2Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+                <span data-i18n="test_all">检测全部延迟</span>
+              </button>
+              <button class="btn btn-primary" id="btn-add-node">
+                <svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                <span data-i18n="add_node">添加节点</span>
+              </button>
+            </div>
+          </header>
+          <div class="upstream-sync" id="upstream-sync">后端同步时间: --:--:--（URL测试模式）</div>
+          <div class="upstream-list" id="upstream-list"></div>
+        </section>
+
+        <!-- ============ 授权许可 ============ -->
+        <section class="page" id="page-license">
+          <header class="page-head">
+            <div class="page-title">
+              <h1 data-i18n="license_title">授权许可</h1>
+              <p data-i18n="license_sub">本复刻版用于学习与研究，完全免费</p>
+            </div>
+          </header>
+          <div class="license-hero">
+            <div class="license-glow"></div>
+            <div class="license-mark">
+              <svg viewBox="0 0 32 32" fill="none"><path d="M5.6 26.5V14.4C5.6 8.6 10.2 4 15.9 4c5.8 0 10.4 4.6 10.4 10.4v12.1l-3.1-2.2-3.2 2.7-3.1-2.7-3.2 2.7-3.1-2.7-2.9 2.2Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><circle cx="12" cy="14" r="1.7" fill="currentColor"/><circle cx="20.2" cy="14" r="1.7" fill="currentColor"/></svg>
+            </div>
+            <div class="license-title">FREE &amp; UNLOCKED</div>
+            <div class="license-price">¥0.00</div>
+            <div class="license-desc">无需注册或激活，所有功能已解锁</div>
+            <div class="license-features">
+              <div><span class="check">✓</span> 无限应用代理</div>
+              <div><span class="check">✓</span> TCP / UDP 完整转发</div>
+              <div><span class="check">✓</span> 子进程自动追踪</div>
+              <div><span class="check">✓</span> DNS 防泄漏</div>
+              <div><span class="check">✓</span> 拖拽注入</div>
+              <div><span class="check">✓</span> 流量监控</div>
+            </div>
+            <div class="license-actions">
+              <button class="btn" id="btn-licenses" data-i18n="view_licenses">查看开源许可</button>
+              <button class="btn btn-primary" id="btn-check-update" data-i18n="check_update">检查更新</button>
+            </div>
+          </div>
+          <div class="license-note">
+            <b>复刻说明</b>
+            <p>本程序依据 Ghost Proxifier Pro 的公开截图与介绍重新实现，核心接入逻辑参考了其 MIT 开源的 Ghost Proxifier 项目。界面、品牌名称与图标仅用于本地学习研究，请勿用于商业分发。</p>
+          </div>
+        </section>
+
+      </div>
+
+      <aside class="right-panel" id="right-panel">
+        <div id="right-panel-content"></div>
+      </aside>
+    </main>
+  </div>
+
+  <div class="drag-overlay" id="drag-overlay">
+    <div class="drag-box">
+      <div class="drag-ico">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M12 16V4m0 0L7 9m5-5 5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      </div>
+      <div class="drag-title">松开以接管此程序</div>
+      <div class="drag-sub">支持 .exe / .lnk / .bat / .cmd，子进程将自动追踪</div>
+    </div>
+  </div>
+
+  <div id="modal-root"></div>
+  <div class="toast-stack" id="toast-stack"></div>
+
+  <script src="app.js?v=8"></script>
+</body>
+</html>
